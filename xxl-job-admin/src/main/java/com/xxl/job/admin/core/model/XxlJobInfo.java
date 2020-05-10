@@ -8,11 +8,20 @@ import java.util.Date;
  * @author xuxueli  2016-1-12 18:25:49
  */
 public class XxlJobInfo {
-	
-	private int id;				// 主键ID
-	
-	private int jobGroup;		// 执行器主键ID
-	private String jobCron;		// 任务执行CRON表达式
+
+	/**
+	 * 主键id
+	 */
+	private int id;
+
+	/**
+	 * 执行器主键ID
+	 */
+	private int jobGroup;
+	/**
+	 * 任务执行CRON表达式
+	 */
+	private String jobCron;
 	private String jobDesc;
 	
 	private Date addTime;
