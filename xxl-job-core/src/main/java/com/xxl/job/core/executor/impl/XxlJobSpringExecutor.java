@@ -33,7 +33,7 @@ public class XxlJobSpringExecutor extends XxlJobExecutor implements ApplicationC
     @Override
     public void afterSingletonsInstantiated() {
 
-        // 从方法级别进行任务处理者仓库初始化，这里进行了优化，将任务的粒度由原先的类转变为了方法级别
+        // 从方法级别进行任务处理程序仓库初始化，这里进行了优化，将任务的粒度由原先的类转变为了方法级别
         initJobHandlerMethodRepository(applicationContext);
 
         // 刷新GlueFactory，此处获取SpringGlueFactory
