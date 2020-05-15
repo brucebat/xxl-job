@@ -27,18 +27,16 @@ import java.util.Map;
 public class XxlJobSpringExecutor extends XxlJobExecutor implements ApplicationContextAware, SmartInitializingSingleton, DisposableBean {
     private static final Logger logger = LoggerFactory.getLogger(XxlJobSpringExecutor.class);
 
-
-    // start
+    /**
+     * 开始
+     */
     @Override
     public void afterSingletonsInstantiated() {
 
-        // init JobHandler Repository
-        /*initJobHandlerRepository(applicationContext);*/
-
-        // init JobHandler Repository (for method)
+        // 从方法级别进行任务执行者仓库初始化
         initJobHandlerMethodRepository(applicationContext);
 
-        // refresh GlueFactory
+        // 刷新GlueFactory，此处获取SpringGlueFactory
         GlueFactory.refreshInstance(1);
 
         // super start
@@ -49,7 +47,10 @@ public class XxlJobSpringExecutor extends XxlJobExecutor implements ApplicationC
         }
     }
 
-    // destroy
+
+    /**
+     * 销毁
+     */
     @Override
     public void destroy() {
         super.destroy();
@@ -59,13 +60,17 @@ public class XxlJobSpringExecutor extends XxlJobExecutor implements ApplicationC
         if (applicationContext == null) {
             return;
         }
-        // init job handler from method
+        // 进行任务执行器初始化
+        // 获取bean名称列表
         String[] beanDefinitionNames = applicationContext.getBeanNamesForType(Object.class, false, true);
         for (String beanDefinitionName : beanDefinitionNames) {
+            // 从上下文中根据bean元数据名称获取bean对象
             Object bean = applicationContext.getBean(beanDefinitionName);
             // referred to ：org.springframework.context.event.EventListenerMethodProcessor.processBean
+            // 获取被@XxlJob注解的方法
             Map<Method, XxlJob> annotatedMethods = null;
             try {
+                // 根据bean类元信息获取被@XxlJob注解的方法
                 annotatedMethods = MethodIntrospector.selectMethods(bean.getClass(),
                         new MethodIntrospector.MetadataLookup<XxlJob>() {
                             @Override
@@ -76,37 +81,41 @@ public class XxlJobSpringExecutor extends XxlJobExecutor implements ApplicationC
             } catch (Throwable ex) {
                 logger.error("xxl-job method-jobhandler resolve error for bean[" + beanDefinitionName + "].", ex);
             }
-            if (annotatedMethods==null || annotatedMethods.isEmpty()) {
+            if (annotatedMethods == null || annotatedMethods.isEmpty()) {
                 continue;
             }
 
             for (Map.Entry<Method, XxlJob> methodXxlJobEntry : annotatedMethods.entrySet()) {
+                // 被注解的方法，即具体的任务
                 Method method = methodXxlJobEntry.getKey();
+                // XxlJob注解类，获取设置的注解信息
                 XxlJob xxlJob = methodXxlJobEntry.getValue();
                 if (xxlJob == null) {
                     continue;
                 }
-
+                // 任务名称
                 String name = xxlJob.value();
                 if (name.trim().length() == 0) {
                     throw new RuntimeException("xxl-job method-jobhandler name invalid, for[" + bean.getClass() + "#" + method.getName() + "] .");
                 }
+                // 检查当前任务名是否已经被使用
                 if (loadJobHandler(name) != null) {
                     throw new RuntimeException("xxl-job jobhandler[" + name + "] naming conflicts.");
                 }
 
-                // execute method
+                // 进行方法参数类型数量和参数类型判断，这里要求方法的参数列表只能有一个参数，并且参数类型为String
                 if (!(method.getParameterTypes().length == 1 && method.getParameterTypes()[0].isAssignableFrom(String.class))) {
                     throw new RuntimeException("xxl-job method-jobhandler param-classtype invalid, for[" + bean.getClass() + "#" + method.getName() + "] , " +
                             "The correct method format like \" public ReturnT<String> execute(String param) \" .");
                 }
+                // 判断方法返回参数类型是否为ReturnT，如果不为ReturnT则为非法
                 if (!method.getReturnType().isAssignableFrom(ReturnT.class)) {
                     throw new RuntimeException("xxl-job method-jobhandler return-classtype invalid, for[" + bean.getClass() + "#" + method.getName() + "] , " +
                             "The correct method format like \" public ReturnT<String> execute(String param) \" .");
                 }
                 method.setAccessible(true);
 
-                // init and destory
+                // 设置初始化方法和销毁方法
                 Method initMethod = null;
                 Method destroyMethod = null;
 
@@ -127,14 +136,17 @@ public class XxlJobSpringExecutor extends XxlJobExecutor implements ApplicationC
                     }
                 }
 
-                // registry jobhandler
+                // 注册任务执行者
                 registJobHandler(name, new MethodJobHandler(bean, method, initMethod, destroyMethod));
             }
         }
 
     }
 
-    // ---------------------- applicationContext ----------------------
+
+    /**
+     * 应用上下文
+     */
     private static ApplicationContext applicationContext;
 
     @Override

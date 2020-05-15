@@ -162,8 +162,18 @@ public class XxlJobExecutor  {
     }
 
 
-    // ---------------------- job handler repository ----------------------
+    /**
+     * 任务执行者仓库
+     */
     private static ConcurrentMap<String, IJobHandler> jobHandlerRepository = new ConcurrentHashMap<String, IJobHandler>();
+
+    /**
+     * 进行任务注册
+     *
+     * @param name 任务名称
+     * @param jobHandler 任务执行者
+     * @return 任务执行者
+     */
     public static IJobHandler registJobHandler(String name, IJobHandler jobHandler){
         logger.info(">>>>>>>>>>> xxl-job register jobhandler success, name:{}, jobHandler:{}", name, jobHandler);
         return jobHandlerRepository.put(name, jobHandler);
@@ -173,14 +183,25 @@ public class XxlJobExecutor  {
     }
 
 
-    // ---------------------- job thread repository ----------------------
+    /**
+     * 任务线程仓库
+     */
     private static ConcurrentMap<Integer, JobThread> jobThreadRepository = new ConcurrentHashMap<Integer, JobThread>();
+
+    /**
+     * 注册任务线程
+     *
+     * @param jobId 任务id
+     * @param handler 任务执行者
+     * @param removeOldReason 移除旧任务线程的原因
+     * @return 任务线程
+     */
     public static JobThread registJobThread(int jobId, IJobHandler handler, String removeOldReason){
         JobThread newJobThread = new JobThread(jobId, handler);
         newJobThread.start();
         logger.info(">>>>>>>>>>> xxl-job regist JobThread success, jobId:{}, handler:{}", new Object[]{jobId, handler});
-
-        JobThread oldJobThread = jobThreadRepository.put(jobId, newJobThread);	// putIfAbsent | oh my god, map's put method return the old value!!!
+        // putIfAbsent | oh my god, map's put method return the old value!!!
+        JobThread oldJobThread = jobThreadRepository.put(jobId, newJobThread);
         if (oldJobThread != null) {
             oldJobThread.toStop(removeOldReason);
             oldJobThread.interrupt();
