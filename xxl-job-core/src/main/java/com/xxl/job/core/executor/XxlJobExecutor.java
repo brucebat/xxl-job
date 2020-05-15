@@ -163,7 +163,7 @@ public class XxlJobExecutor  {
 
 
     /**
-     * 任务执行者仓库
+     * 任务处理程序仓库
      */
     private static ConcurrentMap<String, IJobHandler> jobHandlerRepository = new ConcurrentHashMap<String, IJobHandler>();
 
@@ -171,8 +171,8 @@ public class XxlJobExecutor  {
      * 进行任务注册
      *
      * @param name 任务名称
-     * @param jobHandler 任务执行者
-     * @return 任务执行者
+     * @param jobHandler 任务处理程序
+     * @return 任务处理程序
      */
     public static IJobHandler registJobHandler(String name, IJobHandler jobHandler){
         logger.info(">>>>>>>>>>> xxl-job register jobhandler success, name:{}, jobHandler:{}", name, jobHandler);

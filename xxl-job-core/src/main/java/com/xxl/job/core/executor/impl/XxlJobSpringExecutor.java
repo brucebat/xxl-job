@@ -33,7 +33,7 @@ public class XxlJobSpringExecutor extends XxlJobExecutor implements ApplicationC
     @Override
     public void afterSingletonsInstantiated() {
 
-        // 从方法级别进行任务执行者仓库初始化，这里进行了优化，将任务的粒度由原先的类转变为了方法级别
+        // 从方法级别进行任务处理者仓库初始化，这里进行了优化，将任务的粒度由原先的类转变为了方法级别
         initJobHandlerMethodRepository(applicationContext);
 
         // 刷新GlueFactory，此处获取SpringGlueFactory
@@ -60,7 +60,7 @@ public class XxlJobSpringExecutor extends XxlJobExecutor implements ApplicationC
         if (applicationContext == null) {
             return;
         }
-        // 进行任务执行器初始化
+        // 进行任务处理程序初始化
         // 获取bean名称列表
         String[] beanDefinitionNames = applicationContext.getBeanNamesForType(Object.class, false, true);
         for (String beanDefinitionName : beanDefinitionNames) {
@@ -136,7 +136,7 @@ public class XxlJobSpringExecutor extends XxlJobExecutor implements ApplicationC
                     }
                 }
 
-                // 注册任务执行者
+                // 进行任务处理程序注册
                 registJobHandler(name, new MethodJobHandler(bean, method, initMethod, destroyMethod));
             }
         }
