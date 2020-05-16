@@ -25,7 +25,6 @@ import java.util.concurrent.ConcurrentMap;
 public class XxlJobExecutor  {
     private static final Logger logger = LoggerFactory.getLogger(XxlJobExecutor.class);
 
-    // ---------------------- param ----------------------
     private String adminAddresses;
     private String accessToken;
     private String appname;
@@ -61,7 +60,7 @@ public class XxlJobExecutor  {
     }
 
 
-    // ---------------------- start + stop ----------------------
+
     public void start() throws Exception {
 
         // init logpath
@@ -112,6 +111,7 @@ public class XxlJobExecutor  {
 
 
     // ---------------------- admin-client (rpc invoker) ----------------------
+
     private static List<AdminBiz> adminBizList;
     private void initAdminBizList(String adminAddresses, String accessToken) throws Exception {
         if (adminAddresses!=null && adminAddresses.trim().length()>0) {
@@ -133,6 +133,7 @@ public class XxlJobExecutor  {
     }
 
     // ---------------------- executor-server (rpc provider) ----------------------
+
     private EmbedServer embedServer = null;
 
     private void initEmbedServer(String address, String ip, int port, String appname, String accessToken) throws Exception {
