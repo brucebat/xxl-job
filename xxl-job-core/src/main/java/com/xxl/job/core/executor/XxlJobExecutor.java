@@ -25,13 +25,37 @@ import java.util.concurrent.ConcurrentMap;
 public class XxlJobExecutor  {
     private static final Logger logger = LoggerFactory.getLogger(XxlJobExecutor.class);
 
+    /**
+     * 调度中心地址
+     */
     private String adminAddresses;
+    /**
+     * 令牌
+     */
     private String accessToken;
+    /**
+     * 应用名称
+     */
     private String appname;
+    /**
+     * 地址
+     */
     private String address;
+    /**
+     * 执行器ip
+     */
     private String ip;
+    /**
+     * 端口
+     */
     private int port;
+    /**
+     * 日志路径
+     */
     private String logPath;
+    /**
+     * 日志保留时间，单位：天
+     */
     private int logRetentionDays;
 
     public void setAdminAddresses(String adminAddresses) {
@@ -60,34 +84,38 @@ public class XxlJobExecutor  {
     }
 
 
-
+    /**
+     * 执行器启动方法
+     *
+     * @throws Exception
+     */
     public void start() throws Exception {
 
-        // init logpath
+        // 初始化日志路径
         XxlJobFileAppender.initLogPath(logPath);
 
-        // init invoker, admin-client
+        // 初始化invoker，调度中心客户端
         initAdminBizList(adminAddresses, accessToken);
 
 
-        // init JobLogFileCleanThread
+        // 初始化日志文件清除线程
         JobLogFileCleanThread.getInstance().start(logRetentionDays);
 
-        // init TriggerCallbackThread
+        // 初始化触发器回调线程
         TriggerCallbackThread.getInstance().start();
 
-        // init executor-server
+        // 初始化执行器服务
         initEmbedServer(address, ip, port, appname, accessToken);
     }
     public void destroy(){
-        // destory executor-server
+        // 销毁执行器服务
         stopEmbedServer();
 
-        // destory jobThreadRepository
+        // 销毁任务线程仓库
         if (jobThreadRepository.size() > 0) {
             for (Map.Entry<Integer, JobThread> item: jobThreadRepository.entrySet()) {
                 JobThread oldJobThread = removeJobThread(item.getKey(), "web container destroy and kill the job.");
-                // wait for job thread push result to callback queue
+                // 等待任务线程将结果推送到回调队列
                 if (oldJobThread != null) {
                     try {
                         oldJobThread.join();
@@ -101,10 +129,10 @@ public class XxlJobExecutor  {
         jobHandlerRepository.clear();
 
 
-        // destory JobLogFileCleanThread
+        // 销毁日志文件清除线程
         JobLogFileCleanThread.getInstance().toStop();
 
-        // destory TriggerCallbackThread
+        // 销毁触发器回调线程
         TriggerCallbackThread.getInstance().toStop();
 
     }
