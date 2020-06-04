@@ -40,9 +40,9 @@ public class EmbedServer {
             @Override
             public void run() {
 
-                // param
                 EventLoopGroup bossGroup = new NioEventLoopGroup();
                 EventLoopGroup workerGroup = new NioEventLoopGroup();
+                // 执行器业务线程
                 ThreadPoolExecutor bizThreadPool = new ThreadPoolExecutor(
                         0,
                         200,
@@ -64,7 +64,7 @@ public class EmbedServer {
 
 
                 try {
-                    // start server
+                    // 启动服务
                     ServerBootstrap bootstrap = new ServerBootstrap();
                     bootstrap.group(bossGroup, workerGroup)
                             .channel(NioServerSocketChannel.class)
@@ -80,15 +80,15 @@ public class EmbedServer {
                             })
                             .childOption(ChannelOption.SO_KEEPALIVE, true);
 
-                    // bind
+                    // 绑定端口
                     ChannelFuture future = bootstrap.bind(port).sync();
 
                     logger.info(">>>>>>>>>>> xxl-job remoting server start success, nettype = {}, port = {}", EmbedServer.class, port);
 
-                    // start registry
+                    // 开始注册应用名和执行器地址
                     startRegistry(appname, address);
 
-                    // wait util stop
+                    // 等待直到停止
                     future.channel().closeFuture().sync();
 
                 } catch (InterruptedException e) {
@@ -110,7 +110,9 @@ public class EmbedServer {
             }
 
         });
-        thread.setDaemon(true);	// daemon, service jvm, user thread leave >>> daemon leave >>> jvm leave
+        // 将该线程设置为守护线程
+        // daemon, service jvm, user thread leave >>> daemon leave >>> jvm leave
+        thread.setDaemon(true);
         thread.start();
     }
 
