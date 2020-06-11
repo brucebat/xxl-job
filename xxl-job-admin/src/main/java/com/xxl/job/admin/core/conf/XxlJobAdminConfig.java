@@ -48,7 +48,6 @@ public class XxlJobAdminConfig implements InitializingBean, DisposableBean {
 
     // ---------------------- XxlJobScheduler ----------------------
 
-    // conf
     @Value("${xxl.job.i18n}")
     private String i18n;
 
@@ -118,7 +117,8 @@ public class XxlJobAdminConfig implements InitializingBean, DisposableBean {
 
     public int getLogretentiondays() {
         if (logretentiondays < 7) {
-            return -1;  // Limit greater than or equal to 7, otherwise close
+            // Limit greater than or equal to 7, otherwise close
+            return -1;
         }
         return logretentiondays;
     }
